@@ -1,4 +1,4 @@
-# Better-Layout
+# Better-Layout [![](https://jitpack.io/v/Osiris-Team/Better-Layout.svg)](https://jitpack.io/#Osiris-Team/Better-Layout)
 Probably the best and most modern layout for Java AWT/Swing
 
 ![](assets/example.png)
