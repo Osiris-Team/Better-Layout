@@ -27,7 +27,7 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
     rootLayout.addH(new JLabel("HORIZONTAL"));
     rootLayout.addV(new BLayout(rootLayout, 30, 30)); // 30% of parent width and height
     JTabbedPane tabbedPane = new JTabbedPane();
-    tabbedPane.addTab("hello!", new BLayout());
+    tabbedPane.addTab("hello!", new BLayout()); // 100% of window
     rootLayout.addV(tabbedPane);
 });
 ```
