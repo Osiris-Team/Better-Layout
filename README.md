@@ -1,5 +1,5 @@
-# Better-Layout [![](https://jitpack.io/v/Osiris-Team/Better-Layout.svg)](https://jitpack.io/#Osiris-Team/Better-Layout) (Java 8 or higher)
-Probably the best and most modern layout for Java AWT/Swing
+# Better-Layout [![](https://jitpack.io/v/Osiris-Team/Better-Layout.svg)](https://jitpack.io/#Osiris-Team/Better-Layout)
+Probably the best and most modern layout for Java AWT/Swing (Java 8 or higher required)
 
 ![](assets/example.png)
 
