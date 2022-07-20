@@ -9,25 +9,23 @@ BLayout rootLayout = new BLayout();
 this.setContentPane(rootLayout);
 rootLayout.isDebug = true;
 rootLayout.access(() -> { // No need to call revalidate on any component inside here
-    BLayout lyTitle = new BLayout(true);
+    BLayout lyTitle = new BLayout(true); // true = crop to content
     rootLayout.addV(lyTitle);
-    JLabel titleAutoPlug = new JLabel(), titleTray = new JLabel();
+    JLabel title = new JLabel(), subtitle = new JLabel();
 
-    titleAutoPlug.setText("My title");
-    titleAutoPlug.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
+    title.setText("My title");
+    title.putClientProperty("FlatLaf.style", "font: 200% $semibold.font");
     lyTitle.addH(titleAutoPlug).paddingLeft();
 
-    titleTray.setText("| my subtile");
-    titleTray.putClientProperty("FlatLaf.style", "font: 200% $light.font");
+    subtitle.setText("| my subtile");
+    subtitle.putClientProperty("FlatLaf.style", "font: 200% $light.font");
     lyTitle.addH(titleTray).paddingLeft();
-    
-    // Adds this component to the next line/row.
-    // Basicaly the same as "\n" in a string.    
-    rootLayout.addV(new JLabel("VERTICAL"));
+       
+    rootLayout.addV(new JLabel("VERTICAL")); // Basically the same as "\n" in a string.
     rootLayout.addH(new JLabel("HORIZONTAL"), new JLabel("HORIZONTAL"), new JLabel("HORIZONTAL"));
     rootLayout.addV(new JLabel("VERTICAL"));
     rootLayout.addH(new JLabel("HORIZONTAL"));
-    rootLayout.addV(new BLayout(rootLayout, 30, 30));
+    rootLayout.addV(new BLayout(rootLayout, 30, 30)); // 30% of parent width and height
     JTabbedPane tabbedPane = new JTabbedPane();
     tabbedPane.addTab("hello!", new BLayout());
     rootLayout.addV(tabbedPane);
@@ -35,9 +33,12 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
 ```
 
 ### Features
-
 - Compatible with all Java AWT/Swing components and containers.
-- Styles per component, supports:
-  - Horizontal and Vertical positioning.
-  - Right, left, top and bottom padding.
-- Easy validation/revalidation of container and child containers via `access()` method.
+
+#### Styles per component:
+- Horizontal and Vertical positioning.
+- Right, left, top and bottom padding.
+
+#### Container methods for:
+- Easy validation/revalidation of itself, parent and child containers via `access()` method.
+- Easy addition of components vertically or horizontally via `addV()` and `addH()` methods.
