@@ -13,7 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class UIUtils {
+public class UI {
 
     public static void refresh(Component comp) {
         SwingUtilities.invokeLater(() -> {

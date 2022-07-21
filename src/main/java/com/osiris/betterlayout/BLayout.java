@@ -8,7 +8,7 @@
 
 package com.osiris.betterlayout;
 
-import com.osiris.betterlayout.utils.UIUtils;
+import com.osiris.betterlayout.utils.UI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -103,12 +103,12 @@ public class BLayout extends JPanel {
     }
 
     public void refresh() {
-        UIUtils.refresh(this);
+        UI.refresh(this);
     }
 
     /**
      * Access this container in a thread-safe way. <br>
-     * Performs {@link UIUtils#revalidateAllUp(Component, boolean)} when done running the provided code. <p>
+     * Performs {@link UI#revalidateAllUp(Component, boolean)} when done running the provided code. <p>
      * <p>
      * Note that there is no need of calling {@link #access(Runnable)} again in
      * child containers that are used in the provided code.
@@ -117,7 +117,7 @@ public class BLayout extends JPanel {
      */
     public synchronized BLayout access(Runnable code) {
         code.run();
-        UIUtils.revalidateAllUp(this);
+        UI.revalidateAllUp(this);
         return this;
     }
 

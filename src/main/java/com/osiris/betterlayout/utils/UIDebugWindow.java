@@ -85,7 +85,7 @@ public class UIDebugWindow extends JFrame {
             }
             if (beforeComponent[0] != null) { // Restore before component
                 beforeComponent[0].setBackground(beforeColor[0]);
-                UIUtils.refresh(beforeComponent[0]);
+                UI.refresh(beforeComponent[0]);
                 if (beforeComponent[0] instanceof BLayout)
                     ((BLayout) beforeComponent[0]).isDebug = false;
             }
@@ -152,7 +152,7 @@ public class UIDebugWindow extends JFrame {
 
             // UPDATE STUFF
             lyRight.refresh(); // to avoid UI bug where leftover UI from before was being shown
-            UIUtils.refresh(comp.component);
+            UI.refresh(comp.component);
             beforeComponent[0] = comp.component;
             beforeColor[0] = oldBackgroundColor;
         });
