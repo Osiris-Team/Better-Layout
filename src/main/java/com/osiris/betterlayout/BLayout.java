@@ -25,7 +25,7 @@ public class BLayout extends JPanel {
     /**
      * Default child component styles. <br>
      */
-    public Styles defaultCompStyles = new Styles().center().padding();
+    public Styles defaultCompStyles = new Styles(null).center().padding();
     /**
      * Maps child components to their styles.
      */
@@ -129,7 +129,7 @@ public class BLayout extends JPanel {
      */
     public Styles addH(Component comp) {
         super.add(comp);
-        Styles styles = new Styles();
+        Styles styles = new Styles(comp);
         styles.getMap().putAll(defaultCompStyles.getMap()); // Add defaults
         styles.horizontal();
         compsAndStyles.put(comp, styles);
@@ -154,7 +154,7 @@ public class BLayout extends JPanel {
      */
     public Styles addV(Component comp) {
         super.add(comp);
-        Styles styles = new Styles();
+        Styles styles = new Styles(comp);
         styles.getMap().putAll(defaultCompStyles.getMap()); // Add defaults
         styles.vertical();
         compsAndStyles.put(comp, styles);

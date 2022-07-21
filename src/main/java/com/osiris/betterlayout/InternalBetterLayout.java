@@ -62,6 +62,7 @@ class InternalBetterLayout implements LayoutManager {
         BLayout container = (BLayout) _container;
         synchronized (container.getTreeLock()) {
             //container.setMaximumSize(preferredSize); // Make sure maximum is never bigger than preferred.
+            Dimension parentSize = container.getPreferredSize();
             Insets insets = container.getInsets();
             int startX = insets.left;
             int startY = insets.top;
@@ -77,7 +78,7 @@ class InternalBetterLayout implements LayoutManager {
                 Component comp = components[i];
                 Styles styles = container.compsAndStyles.get(comp);
                 if (styles == null) {
-                    styles = new Styles(); // Components added via the regular container add() methods
+                    styles = new Styles(comp); // Components added via the regular container add() methods
                     styles.getMap().putAll(container.defaultCompStyles.getMap()); // Add defaults
                 }
                 newCompsAndStyles.put(comp, styles);
@@ -118,6 +119,20 @@ class InternalBetterLayout implements LayoutManager {
                             totalHeight += paddingBottom;
                         }
                     }
+                    // Make component smaller to prevent an overflow to the right
+                    /* DOESNT WORK AS EXPECTED
+                    if(!container.isCropToContent){
+                        if(totalWidth >= parentSize.width && (paddingLeft != 0 || paddingRight != 0)){
+                            compSize = new Dimension(compSize.width - (paddingLeft + paddingRight), compSize.height);
+                            totalWidth -= (paddingLeft + paddingRight);
+                        }
+                        if(totalHeight >= parentSize.height && (paddingTop != 0 || paddingBottom != 0)) {
+                            compSize = new Dimension(compSize.width, compSize.height - (paddingTop + paddingBottom));
+                            totalHeight -= (paddingTop + paddingBottom);
+                        }
+                    }
+
+                     */
                     // Align the component either vertically or horizontally
                     boolean isHorizontal = isHorizontal(styles);
                     styles.debugInfo = new DebugInfo(isHorizontal, totalWidth, totalHeight, paddingLeft, paddingRight, paddingTop, paddingBottom);

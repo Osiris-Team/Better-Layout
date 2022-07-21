@@ -8,8 +8,10 @@
 
 package com.osiris.betterlayout;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Wrapper around a {@link Style}s map that
@@ -31,12 +33,20 @@ public class Styles {
      */
     public DebugInfo debugInfo;
 
+    public Component component;
+
     public Styles() {
-        this.map = new HashMap<>();
+        this(null, null);
     }
 
-    public Styles(Map<String, String> map) {
-        this.map = map;
+    public Styles(Component component) {
+        this(component, null);
+    }
+
+    public Styles(Component component, Map<String, String> map) {
+        this.component = component;
+        if(map == null) this.map = new HashMap<>();
+        else this.map = map;
     }
 
     // ALIGNMENT
@@ -157,5 +167,149 @@ public class Styles {
 
     public void setMap(Map<String, String> stylesMap) {
         this.map = stylesMap;
+    }
+
+    // JAVA AWT COMPONENT STUFF
+
+    /**
+     * @see #width(int)
+     */
+    public Styles widthFull() {
+        width(100);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null or its parent is null.
+     */
+    public Styles width(int widthPercent) {
+        Objects.requireNonNull(component);
+        Objects.requireNonNull(component.getParent());
+        updateSizes(component.getParent(), component, widthPercent, component.getHeight());
+        return this;
+    }
+
+    /**
+     * @see #height(int)
+     */
+    public Styles heightFull() {
+        height(100);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null or its parent is null.
+     */
+    public Styles height(int heightPercent) {
+        Objects.requireNonNull(component);
+        Objects.requireNonNull(component.getParent());
+        updateSizes(component.getParent(), component, component.getWidth(), heightPercent);
+        return this;
+    }
+
+    private void updateSizes(Component parent, Component target, int widthPercent, int heightPercent) {
+        int parentWidth, parentHeight;
+        if (parent != null) {
+            parentWidth = parent.getWidth();
+            parentHeight = parent.getHeight();
+        } else { // If no parent provided use the screen dimensions
+            parentWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+            parentHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
+        }
+
+        Dimension size = new Dimension(parentWidth / 100 * widthPercent,
+                parentHeight / 100 * heightPercent);
+
+        // Update container sizes
+        target.setSize(size);
+        target.setPreferredSize(size);
+        target.setMinimumSize(size);
+        target.setMaximumSize(size);
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null.
+     */
+    public Styles background(Color color) {
+        Objects.requireNonNull(component);
+        component.setBackground(color);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null.
+     */
+    public Styles foreground(Color color) {
+        Objects.requireNonNull(component);
+        component.setForeground(color);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null.
+     */
+    public Styles enable() {
+        Objects.requireNonNull(component);
+        component.setEnabled(true);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null.
+     */
+    public Styles disable() {
+        Objects.requireNonNull(component);
+        component.setEnabled(false);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null.
+     */
+    public Styles show() {
+        Objects.requireNonNull(component);
+        component.setVisible(true);
+        return this;
+    }
+
+    /**
+     * Relies on the component having a parent, so make
+     * sure to call this after adding it to a {@link Container}. <p>
+     * This invalidates the container and thus to see changes in the UI
+     * make sure to call this within {@link BLayout#access(Runnable)} or execute {@link Component#revalidate()} manually.
+     * @throws NullPointerException if {@link #component} null.
+     */
+    public Styles hide() {
+        Objects.requireNonNull(component);
+        component.setVisible(false);
+        return this;
     }
 }
