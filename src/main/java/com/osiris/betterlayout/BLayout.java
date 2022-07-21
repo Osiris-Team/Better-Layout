@@ -141,7 +141,7 @@ public class BLayout extends JPanel {
      */
     public BLayout addH(Component... components) {
         for (Component component : components) {
-            addV(component);
+            addH(component);
         }
         return this;
     }
