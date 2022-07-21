@@ -88,7 +88,7 @@ public class TestWindow extends JFrame {
             new BLayout(rootLayout, 30, 10)
                     .addV(new JLabel("Lorem ipsum dolor sit amet! "),
                             new JLabel("Lorem ipsum dolor sit amet! "),
-                            //new JLabel("Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet"),
+                            new JLabel("Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet"),
                             new JLabel("Lorem ipsum dolor sit amet! "),
                             new JLabel("Lorem ipsum dolor sit amet! "))
                     .makeScrollable(); // This adds the scroll layout to the rootLayout
