@@ -71,7 +71,7 @@ class InternalBetterLayout implements LayoutManager {
             // we replace the original compsAndStyles map after being done,
             // with the map below, that only contains currently added/active components.
             Map<Component, Styles> newCompsAndStyles = new HashMap<>();
-            //System.err.println("\n\nLOOP FOR NEW CONTAINER: " + container.getClass().getSimpleName() + "/" + Integer.toHexString(container.hashCode()));
+            //System.err.println("\n\nLOOP FOR NEW CONTAINER: " + container.getClass().getSimpleName() + "/" + Integer.toHexString(container.hashCode()) +" startX="+startX+" startY="+startY);
             Component[] components = container.getComponents();
             for (int i = 0; i < components.length; i++) {
                 Component comp = components[i];
@@ -84,7 +84,10 @@ class InternalBetterLayout implements LayoutManager {
 
                 if (comp.isVisible()) {
                     //System.err.println("\ncomp: " + comp.getClass().getSimpleName() + "/" + Integer.toHexString(comp.hashCode()));
-                    Dimension compSize = comp.getPreferredSize();
+                    Dimension compSize = comp.getSize();
+                    Dimension compPrefSize = comp.getPreferredSize();
+                    if (compSize.width < compPrefSize.width || compSize.height < compPrefSize.height)
+                        compSize = compPrefSize;
                     int totalWidth = compSize.width;
                     int totalHeight = compSize.height;
                     byte paddingLeft = 0, paddingRight = 0, paddingTop = 0, paddingBottom = 0;
@@ -167,7 +170,7 @@ class InternalBetterLayout implements LayoutManager {
                                 heightLastRow = value_styles.debugInfo.totalHeight;
                             //System.err.println("horizontal, width+="+value_styles.debugInfo.totalWidth);
                         } else {
-                            heightLastRow = value_styles.debugInfo.totalHeight;
+                            heightLastRow += value_styles.debugInfo.totalHeight;
                             widthLastRow = value_styles.debugInfo.totalWidth;
                             //System.err.println("vertical, height+="+value_styles.debugInfo.totalHeight);
                         }
@@ -176,9 +179,15 @@ class InternalBetterLayout implements LayoutManager {
                     }
                     //System.err.println("end loop ->");
                 }
-                //System.err.println("container: "+x+"x "+y+"y "+insideWidth+"w "+insideHeight+"h");
-                container.setBounds(x, y, insideWidth, insideHeight);
-                updateSizes(container, insideWidth, insideHeight);
+                //System.err.println("\n\ncontainer: "+x+"x "+y+"y "+insideWidth+"w "+insideHeight+"h");
+                Rectangle boundsNow = container.getBounds();
+                //System.err.println("container-bounds: "+boundsNow.x+"x "+boundsNow.y+"y "+boundsNow.width+"w "+boundsNow.height+"h");
+                if (boundsNow.x < x || boundsNow.y < y || boundsNow.width < insideWidth || boundsNow.height < insideHeight) {
+                    // Check above is required to prevent infinite loop when inside another container.
+                    // Specially when inside a ScrollPane for example.
+                    container.setBounds(x, y, insideWidth, insideHeight);
+                    updateSizes(container, insideWidth, insideHeight);
+                }
             }
             container.compsAndStyles = newCompsAndStyles;
             if (container.isDebug) drawDebugLines(container); // Must be done after replacing the map

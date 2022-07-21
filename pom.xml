@@ -6,7 +6,7 @@
 
     <groupId>com.osiris.betterlayout</groupId>
     <artifactId>betterlayout</artifactId>
-    <version>1.0</version>
+    <version>LATEST</version>
     <packaging>jar</packaging>
 
     <name>Better-Layout</name>

@@ -69,7 +69,7 @@ public class TestWindow extends JFrame {
         this.setContentPane(rootLayout);
         rootLayout.isDebug = true;
         rootLayout.access(() -> { // No need to call revalidate on any component inside here
-            BLayout lyTitle = new BLayout(true);
+            BLayout lyTitle = new BLayout(rootLayout, true);
             rootLayout.addV(lyTitle);
             JLabel titleAutoPlug = new JLabel(), titleTray = new JLabel();
 
@@ -85,9 +85,15 @@ public class TestWindow extends JFrame {
             rootLayout.addH(new JLabel("HORIZONTAL"), new JLabel("HORIZONTAL"), new JLabel("HORIZONTAL"));
             rootLayout.addV(new JLabel("VERTICAL"));
             rootLayout.addH(new JLabel("HORIZONTAL"));
-            rootLayout.addV(new BLayout(rootLayout, 30, 30));
+            new BLayout(rootLayout, 30, 10)
+                    .addV(new JLabel("Lorem ipsum dolor sit amet! "),
+                            new JLabel("Lorem ipsum dolor sit amet! "),
+                            //new JLabel("Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet"),
+                            new JLabel("Lorem ipsum dolor sit amet! "),
+                            new JLabel("Lorem ipsum dolor sit amet! "))
+                    .makeScrollable(); // This adds the scroll layout to the rootLayout
             JTabbedPane tabbedPane = new JTabbedPane();
-            tabbedPane.addTab("hello!", new BLayout());
+            tabbedPane.addTab("hello!", new BLayout(tabbedPane, 100, 10));
             rootLayout.addV(tabbedPane);
         });
     }

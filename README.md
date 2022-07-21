@@ -9,7 +9,7 @@ BLayout rootLayout = new BLayout();
 this.setContentPane(rootLayout);
 rootLayout.isDebug = true;
 rootLayout.access(() -> { // No need to call revalidate on any component inside here
-    BLayout lyTitle = new BLayout(true); // true = crop to content
+    BLayout lyTitle = new BLayout(rootLayout, true); // true = crop to content
     rootLayout.addV(lyTitle);
     JLabel title = new JLabel(), subtitle = new JLabel();
 
@@ -43,3 +43,4 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
 #### Container methods for:
 - Easy validation/revalidation of itself, parent and child containers via `access()` method.
 - Easy addition of components vertically or horizontally via `addV()` and `addH()` methods.
+- Methods to make the layout scrollable and to scroll to horizontal/vertical start/end.

@@ -14,13 +14,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Magical container that makes layouting
  * as simple as writing basic english. <p>
  */
 public class BLayout extends JPanel {
-    private final Container parent;
+    public Container parent;
     /**
      * Default child component styles. <br>
      */
@@ -39,6 +40,7 @@ public class BLayout extends JPanel {
      * Container size gets set to the total child components size. <br>
      */
     public boolean isCropToContent = false;
+    private JScrollPane scrollPane = null;
 
     /**
      * Defaults width & height to 100% of the WINDOW.
@@ -61,8 +63,8 @@ public class BLayout extends JPanel {
      *
      * @see #isCropToContent
      */
-    public BLayout(boolean isCropToContent) {
-        this(null, 0, 0);
+    public BLayout(Container parent, boolean isCropToContent) {
+        this(parent, 0, 0);
         this.isCropToContent = isCropToContent;
     }
 
@@ -82,7 +84,7 @@ public class BLayout extends JPanel {
             parentWidth = parent.getWidth();
             parentHeight = parent.getHeight();
         } else { // If no parent provided use the screen dimensions
-            parentWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+            parentWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
             parentHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         }
 
@@ -137,7 +139,7 @@ public class BLayout extends JPanel {
     /**
      * @see #addV(Component)
      */
-    public BLayout addH(Component... components){
+    public BLayout addH(Component... components) {
         for (Component component : components) {
             addV(component);
         }
@@ -162,7 +164,7 @@ public class BLayout extends JPanel {
     /**
      * @see #addV(Component)
      */
-    public BLayout addV(Component... components){
+    public BLayout addV(Component... components) {
         for (Component component : components) {
             addV(component);
         }
@@ -186,6 +188,72 @@ public class BLayout extends JPanel {
      */
     public Styles getChildStyles(Component comp) {
         return compsAndStyles.get(comp);
+    }
+
+    /**
+     * Removes this layout from its parent and replaces it with a {@link JScrollPane}.
+     * Sets {@link #isCropToContent} to true
+     * and adds this {@link BLayout} to the {@link JScrollPane}. <p>
+     *
+     * Note that the {@link #parent} variable will not get updated, since
+     * it's required to stay the same for {@link #makeUnscrollable()}.
+     *
+     * @throws NullPointerException if {@link #parent} is null.
+     */
+    public BLayout makeScrollable() {
+        Objects.requireNonNull(parent);
+        parent.remove(this);
+        JScrollPane scrollPane = new JScrollPane(this);
+        this.scrollPane = scrollPane;
+        this.isCropToContent = true;
+        //scrollPane.setLayout(new FixScrollPaneLayout.UIResource());
+        scrollPane.setPreferredSize(this.getPreferredSize());
+        parent.add(scrollPane);
+        return this;
+    }
+
+    public BLayout makeUnscrollable(){
+        if(scrollPane == null) return this;
+        int i = 0;
+        synchronized (parent.getTreeLock()) {
+            for (Component c : parent.getComponents()) {
+                if(Objects.equals(c, scrollPane)){
+                    break;
+                }
+                i++;
+            }
+        }
+        parent.remove(scrollPane);
+        parent.add(this, i);
+        return this;
+    }
+
+    public BLayout scrollToEndV() {
+        if (scrollPane == null) return this;
+        JScrollBar bar = scrollPane.getVerticalScrollBar();
+        bar.setValue(bar.getMaximum());
+        return this;
+    }
+
+    public BLayout scrollToStartV() {
+        if (scrollPane == null) return this;
+        JScrollBar bar = scrollPane.getVerticalScrollBar();
+        bar.setValue(bar.getMinimum());
+        return this;
+    }
+
+    public BLayout scrollToEndH() {
+        if (scrollPane == null) return this;
+        JScrollBar bar = scrollPane.getHorizontalScrollBar();
+        bar.setValue(bar.getMaximum());
+        return this;
+    }
+
+    public BLayout scrollToStartH() {
+        if (scrollPane == null) return this;
+        JScrollBar bar = scrollPane.getHorizontalScrollBar();
+        bar.setValue(bar.getMinimum());
+        return this;
     }
 
 }
