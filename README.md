@@ -34,6 +34,7 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
 
 ### Features
 - Compatible with all Java AWT/Swing components and containers.
+- No need to write constraints/styles in strings, everything available through methods.
 
 #### Styles per component:
 - Horizontal and Vertical positioning.
