@@ -25,7 +25,13 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
     rootLayout.addH(new JLabel("HORIZONTAL"), new JLabel("HORIZONTAL"), new JLabel("HORIZONTAL"));
     rootLayout.addV(new JLabel("VERTICAL"));
     rootLayout.addH(new JLabel("HORIZONTAL"));
-    rootLayout.addV(new BLayout(rootLayout, 30, 30)); // 30% of parent width and height
+    new BLayout(rootLayout, 30, 10) // 30% width and 10% height
+        .addV(new JLabel("Lorem ipsum dolor sit amet! "),
+                new JLabel("Lorem ipsum dolor sit amet! "),
+                new JLabel("Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet"),
+                new JLabel("Lorem ipsum dolor sit amet! "),
+                new JLabel("Lorem ipsum dolor sit amet! "))
+        .makeScrollable(); // This adds the scroll layout to the rootLayout
     JTabbedPane tabbedPane = new JTabbedPane();
     tabbedPane.addTab("hello!", new BLayout()); // 100% of window
     rootLayout.addV(tabbedPane);
