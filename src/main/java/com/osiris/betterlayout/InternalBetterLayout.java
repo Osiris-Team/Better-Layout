@@ -8,11 +8,11 @@
 
 package com.osiris.betterlayout;
 
+import com.osiris.betterlayout.utils.StyledComponent;
+
 import java.awt.*;
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
+import java.util.*;
 
 /**
  * Note that this class is private to classes outside this package, due to it
@@ -27,6 +27,8 @@ class InternalBetterLayout implements LayoutManager {
     public int minWidth = 0, minHeight = 0;
     public int preferredWidth = 0, preferredHeight = 0;
     public Dimension minimumSize, preferredSize;
+    int startX, startY;
+    private Dimension containerSize, containerPrefSize;
 
     public InternalBetterLayout(Dimension size) {
         this(size, size);
@@ -62,150 +64,156 @@ class InternalBetterLayout implements LayoutManager {
         BLayout container = (BLayout) _container;
         synchronized (container.getTreeLock()) {
             //container.setMaximumSize(preferredSize); // Make sure maximum is never bigger than preferred.
-            Dimension parentSize = container.getPreferredSize();
+            containerSize = container.getSize();
+            containerPrefSize = container.getPreferredSize();
+            if (containerSize.width < containerPrefSize.width || containerSize.height < containerPrefSize.height)
+                containerSize = containerPrefSize;
             Insets insets = container.getInsets();
-            int startX = insets.left;
-            int startY = insets.top;
-            int x = startX;
-            int y = startY;
+            startX = insets.left;
+            startY = insets.top;
             // To avoid memory filling up with leftover (already removed) components
             // we replace the original compsAndStyles map after being done,
             // with the map below, that only contains currently added/active components.
             Map<Component, Styles> newCompsAndStyles = new HashMap<>();
             //System.err.println("\n\nLOOP FOR NEW CONTAINER: " + container.getClass().getSimpleName() + "/" + Integer.toHexString(container.hashCode()) +" startX="+startX+" startY="+startY);
             Component[] components = container.getComponents();
-            for (int i = 0; i < components.length; i++) {
-                Component comp = components[i];
+            for (Component comp : components) {
                 Styles styles = container.compsAndStyles.get(comp);
                 if (styles == null) {
                     styles = new Styles(comp); // Components added via the regular container add() methods
-                    styles.getMap().putAll(container.defaultCompStyles.getMap()); // Add defaults
+                    styles.map.putAll(container.defaultCompStyles.map); // Add defaults
                 }
                 newCompsAndStyles.put(comp, styles);
-
-                if (comp.isVisible()) {
-                    //System.err.println("\ncomp: " + comp.getClass().getSimpleName() + "/" + Integer.toHexString(comp.hashCode()));
-                    Dimension compSize = comp.getSize();
-                    Dimension compPrefSize = comp.getPreferredSize();
-                    if (compSize.width < compPrefSize.width || compSize.height < compPrefSize.height)
-                        compSize = compPrefSize;
-                    int totalWidth = compSize.width;
-                    int totalHeight = compSize.height;
-                    byte paddingLeft = 0, paddingRight = 0, paddingTop = 0, paddingBottom = 0;
-                    //System.err.println("at start: " + x + "x " + y + "y " + totalWidth + "w " + totalHeight + "h ");
-
-                    // Calc total width and height
-                    for (Map.Entry<String, String> entry : styles.getMap().entrySet()) {
-                        String key, value;
-                        try {
-                            key = entry.getKey();
-                            value = entry.getValue();
-                        } catch (IllegalStateException ise) {
-                            // this usually means the entry is no longer in the map.
-                            throw new ConcurrentModificationException(ise);
-                        }
-                        // Calc total height and width
-                        if (Objects.equals(key, Style.padding_left.key)) {
-                            paddingLeft = Byte.parseByte(value);
-                            totalWidth += paddingLeft;
-                        } else if (Objects.equals(key, Style.padding_right.key)) {
-                            paddingRight = Byte.parseByte(value);
-                            totalWidth += paddingRight;
-                        } else if (Objects.equals(key, Style.padding_top.key)) {
-                            paddingTop = Byte.parseByte(value);
-                            totalHeight += paddingTop;
-                        } else if (Objects.equals(key, Style.padding_bottom.key)) {
-                            paddingBottom = Byte.parseByte(value);
-                            totalHeight += paddingBottom;
-                        }
-                    }
-                    // Make component smaller to prevent an overflow to the right
-                    /* DOESNT WORK AS EXPECTED
-                    if(!container.isCropToContent){
-                        if(totalWidth >= parentSize.width && (paddingLeft != 0 || paddingRight != 0)){
-                            compSize = new Dimension(compSize.width - (paddingLeft + paddingRight), compSize.height);
-                            totalWidth -= (paddingLeft + paddingRight);
-                        }
-                        if(totalHeight >= parentSize.height && (paddingTop != 0 || paddingBottom != 0)) {
-                            compSize = new Dimension(compSize.width, compSize.height - (paddingTop + paddingBottom));
-                            totalHeight -= (paddingTop + paddingBottom);
-                        }
-                    }
-
-                     */
-                    // Align the component either vertically or horizontally
-                    boolean isHorizontal = isHorizontal(styles);
-                    styles.debugInfo = new DebugInfo(isHorizontal, totalWidth, totalHeight, paddingLeft, paddingRight, paddingTop, paddingBottom);
-                    //System.err.println("totalWidth: " + totalWidth + " totalHeight: " + totalHeight);
-
-                    if (!isHorizontal) { // CURRENT COMP IS VERTICAL
-                        int totalHeightTallestCompInRow = 0;
-                        for (int j = i - 1; j >= 0; j--) {
-                            if (components[j].isVisible()) {
-                                Styles stylesBefore = newCompsAndStyles.get(components[j]);
-                                if (stylesBefore.debugInfo.totalHeight > totalHeightTallestCompInRow)
-                                    totalHeightTallestCompInRow = stylesBefore.debugInfo.totalHeight;
-                                if (!stylesBefore.debugInfo.isHorizontal) break;
-                            }
-                        }
-                        //System.err.println("IS VERTICAL! : " + x + "x " + y + "y " + totalHeightTallestCompInRow + "tallestHeight");
-                        x = startX; // Move comp to the left (start)
-                        y += totalHeightTallestCompInRow; // Move comp to the next line
-                        totalHeightTallestCompInRow = totalHeight; // Directly update variable since we are now in the next row
-                        //System.err.println("IS VERTICAL! : " + x + "x " + y + "y " + totalHeightTallestCompInRow + "tallestHeight");
-                    }
-
-                    // Set the component's size and position.
-                    comp.setBounds(x + paddingLeft, y + paddingTop, compSize.width, compSize.height);
-                    // Set the next components start positions.
-                    x += totalWidth;
-                    //System.err.println("at end: " + x + "x " + y + "y " + totalWidth + "w " + totalHeight + "h ");
-                }
-            }
-            // Reset x,y after loop
-            x = startX;
-            y = startY;
-            if (container.isCropToContent) {
-                int insideHeight = 0, insideWidth = 0;
-                int widthLastRow = 0, heightLastRow = 0;
-                //System.err.println("start: "+x+"x "+y+"y "+insideWidth+"w "+insideHeight+"h");
-                for (Map.Entry<Component, Styles> entry : newCompsAndStyles.entrySet()) {
-                    Component key_comp;
-                    Styles value_styles;
-                    try {
-                        key_comp = entry.getKey();
-                        value_styles = entry.getValue();
-                    } catch (IllegalStateException ise) { // this usually means the entry is no longer in the map.
-                        throw new ConcurrentModificationException(ise);
-                    }
-                    if (key_comp.isVisible()) {
-                        if (isHorizontal(value_styles)) {
-                            widthLastRow += value_styles.debugInfo.totalWidth;
-                            if (heightLastRow < value_styles.debugInfo.totalHeight)
-                                heightLastRow = value_styles.debugInfo.totalHeight;
-                            //System.err.println("horizontal, width+="+value_styles.debugInfo.totalWidth);
-                        } else {
-                            heightLastRow += value_styles.debugInfo.totalHeight;
-                            widthLastRow = value_styles.debugInfo.totalWidth;
-                            //System.err.println("vertical, height+="+value_styles.debugInfo.totalHeight);
-                        }
-                        if (widthLastRow > insideWidth) insideWidth = widthLastRow;
-                        if (heightLastRow > insideHeight) insideHeight = heightLastRow;
-                    }
-                    //System.err.println("end loop ->");
-                }
-                //System.err.println("\n\ncontainer: "+x+"x "+y+"y "+insideWidth+"w "+insideHeight+"h");
-                Rectangle boundsNow = container.getBounds();
-                //System.err.println("container-bounds: "+boundsNow.x+"x "+boundsNow.y+"y "+boundsNow.width+"w "+boundsNow.height+"h");
-                if (boundsNow.x < x || boundsNow.y < y || boundsNow.width < insideWidth || boundsNow.height < insideHeight) {
-                    // Check above is required to prevent infinite loop when inside another container.
-                    // Specially when inside a ScrollPane for example.
-                    container.setBounds(x, y, insideWidth, insideHeight);
-                    updateSizes(container, insideWidth, insideHeight);
-                }
             }
             container.compsAndStyles = newCompsAndStyles;
+            java.util.List<StyledComponent[]> rows = toRows(newCompsAndStyles, components);
+            drawRows(rows);
+
+            if (container.isCropToContent) {
+                //System.err.println("\n\ncontainer: "+x+"x "+y+"y "+insideWidth+"w "+insideHeight+"h");
+                Rectangle boundsNow = container.getBounds();
+                int containerWidth = calcContainerWidth(rows);
+                int containerHeight = calcContainerHeight(rows);
+                //System.err.println("container-bounds: "+boundsNow.x+"x "+boundsNow.y+"y "+boundsNow.width+"w "+boundsNow.height+"h");
+                if (boundsNow.width < containerWidth || boundsNow.height < containerHeight) {
+                    // Check above is required to prevent infinite loop when inside another container.
+                    // Specially when inside a ScrollPane for example.
+                    container.setBounds(boundsNow.x, boundsNow.y, containerWidth, containerHeight);
+                    updateSizes(container, containerWidth, containerHeight);
+                }
+            }
             if (container.isDebug) drawDebugLines(container); // Must be done after replacing the map
+        }
+    }
+
+    private int calcContainerHeight(java.util.List<StyledComponent[]> rows) {
+        int height = 0;
+        for (StyledComponent[] row : rows) {
+            if (row.length != 0)
+                height += row[0].styles.info.totalHeight; // == rowHeight == the tallest component
+        }
+        return height;
+    }
+
+    private int calcContainerWidth(java.util.List<StyledComponent[]> rows) {
+        int width = 0;
+        for (StyledComponent[] row : rows) {
+            int rowWidth = 0;
+            for (StyledComponent styledComponent : row) {
+                rowWidth += styledComponent.styles.info.totalWidth;
+            }
+            if (rowWidth > width) width = rowWidth;
+        }
+        return width;
+    }
+
+    private void drawRows(java.util.List<StyledComponent[]> rows) {
+        int x = startX;
+        int y = startY;
+        for (StyledComponent[] row : rows) {
+
+            // DETERMINE TOTAL HEIGHT & WIDTH FOR EACH COMPONENT IN ROW
+            for (StyledComponent styledComponent : row) {
+                Component comp = styledComponent.component;
+                Styles styles = styledComponent.styles;
+                Dimension compSize = comp.getSize();
+                Dimension compPrefSize = comp.getPreferredSize();
+                if (compSize.width < compPrefSize.width || compSize.height < compPrefSize.height)
+                    compSize = compPrefSize;
+                int width = compSize.width;
+                int height = compSize.height;
+                int totalWidth = compSize.width;
+                int totalHeight = compSize.height;
+                byte paddingLeft = 0, paddingRight = 0, paddingTop = 0, paddingBottom = 0;
+                //System.err.println("at start: " + x + "x " + y + "y " + totalWidth + "w " + totalHeight + "h ");
+                String valPaddingLeft = styles.map.get(Style.padding_left.key);
+                String valPaddingRight = styles.map.get(Style.padding_right.key);
+                String valPaddingTop = styles.map.get(Style.padding_top.key);
+                String valPaddingBottom = styles.map.get(Style.padding_bottom.key);
+                if (valPaddingLeft != null) {
+                    paddingLeft = Byte.parseByte(valPaddingLeft);
+                    totalWidth += paddingLeft;
+                }
+                if (valPaddingRight != null) {
+                    paddingRight = Byte.parseByte(valPaddingRight);
+                    totalWidth += paddingRight;
+                }
+                if (valPaddingTop != null) {
+                    paddingTop = Byte.parseByte(valPaddingTop);
+                    totalHeight += paddingTop;
+                }
+                if (valPaddingBottom != null) {
+                    paddingBottom = Byte.parseByte(valPaddingBottom);
+                    totalHeight += paddingBottom;
+                }
+                // If component 100% width or height, make it smaller to prevent padding overflow to the right or bottom
+                /* // Doesn't work like intended somehow //TODO
+                if(totalWidth >= containerSize.width && (paddingLeft != 0 || paddingRight != 0)){
+                    width = compSize.width - (paddingLeft + paddingRight);
+                    totalWidth -= (paddingLeft + paddingRight);
+                }
+                if(totalHeight >= containerSize.height && (paddingTop != 0 || paddingBottom != 0)) {
+                    height = compSize.height - (paddingTop + paddingBottom);
+                    totalHeight -= (paddingTop + paddingBottom);
+                }
+                 */
+                styles.info.width = width;
+                styles.info.height = height;
+                styles.info.totalWidth = totalWidth;
+                styles.info.totalHeight = totalHeight;
+                styles.info.paddingLeft = paddingLeft;
+                styles.info.paddingRight = paddingRight;
+                styles.info.paddingTop = paddingTop;
+                styles.info.paddingBottom = paddingBottom;
+            }
+
+            // DETERMINE TOTAL HEIGHT OF TALLEST COMPONENT IN ROW
+            int rowHeight = 0;
+            for (StyledComponent styledComponent : row) {
+                if (styledComponent.styles.info.totalHeight > rowHeight)
+                    rowHeight = styledComponent.styles.info.totalHeight;
+            }
+            // Set the total height of all components in the row, to the tallest height
+            for (StyledComponent styledComponent : row) {
+                styledComponent.styles.info.totalHeight = rowHeight;
+            }
+            // fill()
+
+            // Determine position
+
+            // DRAW COMPONENTS IN ROW
+            for (StyledComponent styledComponent : row) {
+                // Set the component's size and position.
+                styledComponent.component.setBounds(
+                        x + styledComponent.styles.info.paddingLeft, y + styledComponent.styles.info.paddingTop,
+                        styledComponent.styles.info.width, styledComponent.styles.info.height);
+                //System.err.println("draw("+(styledComponent.styles.info.isHorizontal ? "H":"V")+"): "+styledComponent.component.getClass().getSimpleName() + "/" + Integer.toHexString(styledComponent.component.hashCode()) + " "+
+                //        x + styledComponent.styles.info.paddingLeft+ "x " + styledComponent.styles.info.width + "width "+ y + styledComponent.styles.info.paddingTop + "y " + styledComponent.styles.info.height + "height ");
+                x += styledComponent.styles.info.totalWidth; // For the next components start position.
+            }
+            // Next row, aka new line
+            x = startX;
+            y += rowHeight; // Move comp to the next line
         }
     }
 
@@ -225,8 +233,59 @@ class InternalBetterLayout implements LayoutManager {
 //        comp.getMinimumSize().height = height;
     }
 
+    /**
+     * Goes through the provided components array and searches for vertical
+     * components. Those components can be thought of \n (next line) characters.
+     * When a vertical component is found, all components until the start or
+     * last vertical component get put into a new array. That's our row.
+     * <p>
+     * This method returns a list of those rows. Besides, that is also does: <br>
+     * - Only visible components are added to the row. <br>
+     * - Styles are mapped to components, aka the {@link StyledComponent} obj is created. <br>
+     * - {@link Styles#info} is initialized, and the value for {@link DebugInfo#isHorizontal} set. <br>
+     *
+     * @param _components   not null.
+     * @param mapCompStyles not null, and expected to have one {@link Styles} object, for each {@link Component} object
+     *                      in the array.
+     */
+    private java.util.List<StyledComponent[]> toRows(Map<Component, Styles> mapCompStyles, Component... _components) {
+        // Remove not visible components first
+        List<StyledComponent> temp = new ArrayList<>(_components.length);
+        for (Component comp : _components) {
+            if (comp.isVisible()) {
+                StyledComponent styledComponent = new StyledComponent(comp);
+                styledComponent.styles = mapCompStyles.get(comp);
+                styledComponent.styles.info = new DebugInfo();
+                styledComponent.styles.info.isHorizontal = isHorizontal(styledComponent.styles);
+                temp.add(styledComponent);
+            }
+        }
+        StyledComponent[] components = temp.toArray(new StyledComponent[0]);
+
+        // Do actual job:
+        java.util.List<StyledComponent[]> rows = new ArrayList<>();
+        int lastVerticalCompIndex = 0;
+        for (int i = 0; i < components.length; i++) {
+            StyledComponent comp = components[i];
+            if (!comp.styles.info.isHorizontal) {
+                rows.add(Arrays.copyOfRange(components, lastVerticalCompIndex, i));  // i exclusive
+                lastVerticalCompIndex = i;
+            }
+        }
+        if (components.length > 0 && !components[components.length - 1].styles.info.isHorizontal)// Last vertical component
+            rows.add(new StyledComponent[]{components[components.length - 1]});
+        if (rows.isEmpty()) { // Only horizontal components
+            rows.add(components);
+        }
+        return rows;
+    }
+
+    private boolean isVertical(Styles styles) {
+        return !isHorizontal(styles);
+    }
+
     private boolean isHorizontal(Styles styles) {
-        String alignment = styles.getMap().get(Style.vertical.key);
+        String alignment = styles.map.get(Style.vertical.key);
         if (alignment == null) alignment = Style.horizontal.value;
         return Objects.equals(alignment, Style.horizontal.value);
     }
@@ -238,10 +297,10 @@ class InternalBetterLayout implements LayoutManager {
         for (Component comp : container.getComponents()) {
             Styles styles = container.compsAndStyles.get(comp);
             Objects.requireNonNull(styles);
-            int x = comp.getX() - styles.debugInfo.paddingLeft;
-            int y = comp.getY() - styles.debugInfo.paddingTop;
-            int width = comp.getWidth() + styles.debugInfo.paddingLeft + styles.debugInfo.paddingRight;
-            int height = comp.getHeight() + styles.debugInfo.paddingTop + styles.debugInfo.paddingBottom;
+            int x = comp.getX() - styles.info.paddingLeft;
+            int y = comp.getY() - styles.info.paddingTop;
+            int width = comp.getWidth() + styles.info.paddingLeft + styles.info.paddingRight;
+            int height = comp.getHeight() + styles.info.paddingTop + styles.info.paddingBottom;
             g.setColor(Color.red);
             g.drawRect(x, y, width, height); // Full width/height with padding included
             g.setColor(Color.blue); // Actual component width/height

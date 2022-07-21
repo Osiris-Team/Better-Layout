@@ -130,7 +130,7 @@ public class BLayout extends JPanel {
     public Styles addH(Component comp) {
         super.add(comp);
         Styles styles = new Styles(comp);
-        styles.getMap().putAll(defaultCompStyles.getMap()); // Add defaults
+        styles.map.putAll(defaultCompStyles.map); // Add defaults
         styles.horizontal();
         compsAndStyles.put(comp, styles);
         return styles;
@@ -155,7 +155,7 @@ public class BLayout extends JPanel {
     public Styles addV(Component comp) {
         super.add(comp);
         Styles styles = new Styles(comp);
-        styles.getMap().putAll(defaultCompStyles.getMap()); // Add defaults
+        styles.map.putAll(defaultCompStyles.map); // Add defaults
         styles.vertical();
         compsAndStyles.put(comp, styles);
         return styles;
@@ -194,7 +194,7 @@ public class BLayout extends JPanel {
      * Removes this layout from its parent and replaces it with a {@link JScrollPane}.
      * Sets {@link #isCropToContent} to true
      * and adds this {@link BLayout} to the {@link JScrollPane}. <p>
-     *
+     * <p>
      * Note that the {@link #parent} variable will not get updated, since
      * it's required to stay the same for {@link #makeUnscrollable()}.
      *
@@ -212,12 +212,12 @@ public class BLayout extends JPanel {
         return this;
     }
 
-    public BLayout makeUnscrollable(){
-        if(scrollPane == null) return this;
+    public BLayout makeUnscrollable() {
+        if (scrollPane == null) return this;
         int i = 0;
         synchronized (parent.getTreeLock()) {
             for (Component c : parent.getComponents()) {
-                if(Objects.equals(c, scrollPane)){
+                if (Objects.equals(c, scrollPane)) {
                     break;
                 }
                 i++;

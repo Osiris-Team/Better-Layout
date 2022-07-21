@@ -22,6 +22,11 @@ public class DebugInfo {
     public int totalHeight;
 
     public byte paddingLeft, paddingRight, paddingTop, paddingBottom;
+    public int width;
+    public int height;
+
+    public DebugInfo() {
+    }
 
     public DebugInfo(boolean isHorizontal, int totalWidth, int totalHeight, byte paddingLeft, byte paddingRight, byte paddingTop, byte paddingBottom) {
         this.isHorizontal = isHorizontal;

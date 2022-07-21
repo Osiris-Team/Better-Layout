@@ -35,13 +35,13 @@ public class UIDebugWindow extends JFrame {
         loadData();
     }
 
-    private void fillTreeNodes(DefaultMutableTreeNode parentNode, CompWrapper comp) {
+    private void fillTreeNodes(DefaultMutableTreeNode parentNode, StyledComponent comp) {
         DefaultMutableTreeNode currentNode = new DefaultMutableTreeNode(comp);
         parentNode.add(currentNode);
         if (comp.component instanceof Container) { // is container?
             Container container = (Container) comp.component;
             for (Component childComp : container.getComponents()) {
-                fillTreeNodes(currentNode, new CompWrapper(childComp));
+                fillTreeNodes(currentNode, new StyledComponent(childComp));
             }
         }
     }
@@ -62,7 +62,7 @@ public class UIDebugWindow extends JFrame {
                 .center();
 
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Inspecting contents of " + targetComponent.getClass().getSimpleName());
-        fillTreeNodes(rootNode, new CompWrapper(targetComponent));
+        fillTreeNodes(rootNode, new StyledComponent(targetComponent));
 
         DefaultTreeModel model = new DefaultTreeModel(rootNode);
         tree.setModel(model);
@@ -90,7 +90,7 @@ public class UIDebugWindow extends JFrame {
                     ((BLayout) beforeComponent[0]).isDebug = false;
             }
 
-            CompWrapper comp = (CompWrapper) node.getUserObject();
+            StyledComponent comp = (StyledComponent) node.getUserObject();
             Color oldBackgroundColor = comp.component.getBackground();
             comp.component.setBackground(new Color(129, 129, 129)); // Mark component, with blueish color
 

@@ -86,6 +86,7 @@ public class TestWindow extends JFrame {
             rootLayout.addV(new JLabel("VERTICAL"));
             rootLayout.addH(new JLabel("HORIZONTAL"));
             rootLayout.addV(new BLayout()).widthFull().height(10).background(Color.red);
+            rootLayout.addV(new BLayout()).width(1).height(10).background(Color.green);
             new BLayout(rootLayout, 30, 10)
                     .addV(new JLabel("Lorem ipsum dolor sit amet! "),
                             new JLabel("Lorem ipsum dolor sit amet! "),
