@@ -42,6 +42,13 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
 - Compatible with all Java AWT/Swing components and containers.
 - No need to write constraints/styles in strings, everything available through methods.
 
+#### Design choices:
+- Better-Layout tries to combine vertical & horizontal layouts
+and to reduce the amount of indidual child layouts needed to create more complex layouts.
+- Each child element has its own style attributes.
+- Absolute positioning thorugh relative parent sizes.
+- TODO: Responsive layout support.
+
 #### Styles per component:
 - Horizontal and Vertical positioning.
 - Right, left, top and bottom padding.
@@ -50,3 +57,4 @@ rootLayout.access(() -> { // No need to call revalidate on any component inside 
 - Easy validation/revalidation of itself, parent and child containers via `access()` method.
 - Easy addition of components vertically or horizontally via `addV()` and `addH()` methods.
 - Methods to make the layout scrollable and to scroll to horizontal/vertical start/end.
+
