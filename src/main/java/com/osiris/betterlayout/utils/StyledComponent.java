@@ -7,13 +7,13 @@ package com.osiris.betterlayout.utils;
  * of the MIT-License. Consult the "LICENSE" file for details.
  */
 
-import com.osiris.betterlayout.Styles;
+import com.osiris.betterlayout.CompWrapper;
 
 import java.awt.*;
 
 public class StyledComponent {
     public Component component;
-    public Styles styles;
+    public CompWrapper compWrapper;
 
     public StyledComponent(Component component) {
         this.component = component;

@@ -9,15 +9,19 @@
 package com.osiris.betterlayout;
 
 import java.awt.*;
+import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Wrapper around a {@link Style}s map that
  * provides util methods for setting and retrieving stuff.
  */
-public class Styles {
+public class CompWrapper {
     /**
      * Map containing the actual styles.
      *
@@ -35,15 +39,15 @@ public class Styles {
 
     public Component component;
 
-    public Styles() {
+    public CompWrapper() {
         this(null, null);
     }
 
-    public Styles(Component component) {
+    public CompWrapper(Component component) {
         this(component, null);
     }
 
-    public Styles(Component component, Map<String, String> map) {
+    public CompWrapper(Component component, Map<String, String> map) {
         this.component = component;
         if (map == null) this.map = new HashMap<>();
         else this.map = map;
@@ -51,39 +55,39 @@ public class Styles {
 
     // ALIGNMENT
 
-    public Styles vertical() {
+    public CompWrapper vertical() {
         map.put(Style.vertical.key, Style.vertical.value);
         return this;
     }
 
-    public Styles horizontal() {
+    public CompWrapper horizontal() {
         map.put(Style.horizontal.key, Style.horizontal.value);
         return this;
     }
 
     // POSITION
 
-    public Styles left() {
+    public CompWrapper left() {
         map.put(Style.left.key, Style.left.value);
         return this;
     }
 
-    public Styles right() {
+    public CompWrapper right() {
         map.put(Style.right.key, Style.right.value);
         return this;
     }
 
-    public Styles top() {
+    public CompWrapper top() {
         map.put(Style.top.key, Style.top.value);
         return this;
     }
 
-    public Styles bottom() {
+    public CompWrapper bottom() {
         map.put(Style.bottom.key, Style.bottom.value);
         return this;
     }
 
-    public Styles center() {
+    public CompWrapper center() {
         map.put(Style.center.key, Style.center.value);
         return this;
     }
@@ -93,7 +97,7 @@ public class Styles {
     /**
      * Adds default padding to the left, right, top and bottom.
      */
-    public Styles padding() {
+    public CompWrapper padding() {
         map.put(Style.padding_left.key, Style.padding_left.value);
         map.put(Style.padding_right.key, Style.padding_right.value);
         map.put(Style.padding_top.key, Style.padding_top.value);
@@ -101,7 +105,7 @@ public class Styles {
         return this;
     }
 
-    public Styles padding(int px) {
+    public CompWrapper padding(int px) {
         map.put(Style.padding_left.key, "" + (byte) px);
         map.put(Style.padding_right.key, "" + (byte) px);
         map.put(Style.padding_top.key, "" + (byte) px);
@@ -109,42 +113,42 @@ public class Styles {
         return this;
     }
 
-    public Styles paddingLeft() {
+    public CompWrapper paddingLeft() {
         map.put(Style.padding_left.key, Style.padding_left.value);
         return this;
     }
 
-    public Styles paddingLeft(int px) {
+    public CompWrapper paddingLeft(int px) {
         map.put(Style.padding_left.key, "" + (byte) px);
         return this;
     }
 
-    public Styles paddingRight() {
+    public CompWrapper paddingRight() {
         map.put(Style.padding_right.key, Style.padding_right.value);
         return this;
     }
 
-    public Styles paddingRight(int px) {
+    public CompWrapper paddingRight(int px) {
         map.put(Style.padding_right.key, "" + (byte) px);
         return this;
     }
 
-    public Styles paddingTop() {
+    public CompWrapper paddingTop() {
         map.put(Style.padding_top.key, Style.padding_top.value);
         return this;
     }
 
-    public Styles paddingTop(int px) {
+    public CompWrapper paddingTop(int px) {
         map.put(Style.padding_top.key, "" + (byte) px);
         return this;
     }
 
-    public Styles paddingBottom() {
+    public CompWrapper paddingBottom() {
         map.put(Style.padding_bottom.key, Style.padding_bottom.value);
         return this;
     }
 
-    public Styles paddingBottom(int px) {
+    public CompWrapper paddingBottom(int px) {
         map.put(Style.padding_bottom.key, "" + (byte) px);
         return this;
     }
@@ -152,7 +156,7 @@ public class Styles {
     /**
      * Deletes all the padding.
      */
-    public Styles delPadding() {
+    public CompWrapper delPadding() {
         map.remove(Style.padding_left.key);
         map.remove(Style.padding_right.key);
         map.remove(Style.padding_top.key);
@@ -165,7 +169,7 @@ public class Styles {
     /**
      * @see #width(int)
      */
-    public Styles widthFull() {
+    public CompWrapper widthFull() {
         width(100);
         return this;
     }
@@ -178,7 +182,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null or its parent is null.
      */
-    public Styles width(int widthPercent) {
+    public CompWrapper width(int widthPercent) {
         Objects.requireNonNull(component);
         Objects.requireNonNull(component.getParent());
         updateWidth(component.getParent(), component, widthPercent);
@@ -188,7 +192,7 @@ public class Styles {
     /**
      * @see #height(int)
      */
-    public Styles heightFull() {
+    public CompWrapper heightFull() {
         height(100);
         return this;
     }
@@ -201,7 +205,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null or its parent is null.
      */
-    public Styles height(int heightPercent) {
+    public CompWrapper height(int heightPercent) {
         Objects.requireNonNull(component);
         Objects.requireNonNull(component.getParent());
         updateHeight(component.getParent(), component, heightPercent);
@@ -238,7 +242,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null.
      */
-    public Styles background(Color color) {
+    public CompWrapper background(Color color) {
         Objects.requireNonNull(component);
         component.setBackground(color);
         return this;
@@ -252,7 +256,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null.
      */
-    public Styles foreground(Color color) {
+    public CompWrapper foreground(Color color) {
         Objects.requireNonNull(component);
         component.setForeground(color);
         return this;
@@ -266,7 +270,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null.
      */
-    public Styles enable() {
+    public CompWrapper enable() {
         Objects.requireNonNull(component);
         component.setEnabled(true);
         return this;
@@ -280,7 +284,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null.
      */
-    public Styles disable() {
+    public CompWrapper disable() {
         Objects.requireNonNull(component);
         component.setEnabled(false);
         return this;
@@ -294,7 +298,7 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null.
      */
-    public Styles show() {
+    public CompWrapper show() {
         Objects.requireNonNull(component);
         component.setVisible(true);
         return this;
@@ -308,9 +312,286 @@ public class Styles {
      *
      * @throws NullPointerException if {@link #component} null.
      */
-    public Styles hide() {
+    public CompWrapper hide() {
         Objects.requireNonNull(component);
         component.setVisible(false);
         return this;
     }
+
+    public CompWrapper onClick(Consumer<MouseEvent> action){
+        component.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onMouseEnter(Consumer<MouseEvent> action){
+        component.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onMouseExit(Consumer<MouseEvent> action){
+        component.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                action.accept(e);
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onScroll(Consumer<MouseWheelEvent> action){
+        component.addMouseWheelListener(action::accept);
+        return this;
+    }
+
+    public CompWrapper onFocusGain(Consumer<FocusEvent> action){
+        component.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onFocusLoss(Consumer<FocusEvent> action){
+        component.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                action.accept(e);
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onKeyType(Consumer<KeyEvent> action){
+        component.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onInputChange(Consumer<InputMethodEvent> action){
+        component.addInputMethodListener(new InputMethodListener() {
+            @Override
+            public void inputMethodTextChanged(InputMethodEvent event) {
+                action.accept(event);
+            }
+
+            @Override
+            public void caretPositionChanged(InputMethodEvent event) {
+
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onCaretChange(Consumer<InputMethodEvent> action){
+        component.addInputMethodListener(new InputMethodListener() {
+            @Override
+            public void inputMethodTextChanged(InputMethodEvent event) {
+            }
+
+            @Override
+            public void caretPositionChanged(InputMethodEvent event) {
+                action.accept(event);
+            }
+        });
+        return this;
+    }
+
+    public CompWrapper onResize(Consumer<ComponentEvent> action){
+        component.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
+        return  this;
+    }
+
+    public CompWrapper onMoved(Consumer<ComponentEvent> action){
+        component.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+
+            }
+        });
+        return  this;
+    }
+
+    public CompWrapper onShow(Consumer<ComponentEvent> action){
+        component.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                action.accept(e);
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
+        return  this;
+    }
+
+    public CompWrapper onHide(Consumer<ComponentEvent> action){
+        component.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                action.accept(e);
+            }
+        });
+        return  this;
+    }
+
+    public CompWrapper onPropertyChange(Consumer<PropertyChangeEvent> action){
+        component.addPropertyChangeListener(action::accept);
+        return  this;
+    }
+
+
 }

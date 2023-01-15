@@ -25,11 +25,11 @@ public class BLayout extends JPanel {
     /**
      * Default child component styles. <br>
      */
-    public Styles defaultCompStyles = new Styles(null).center().padding();
+    public CompWrapper defaultCompCompWrapper = new CompWrapper(null).center().padding();
     /**
      * Maps child components to their styles.
      */
-    public Map<Component, Styles> compsAndStyles = new HashMap<>();
+    public Map<Component, CompWrapper> compsAndStyles = new HashMap<>();
     /**
      * Call {@link #refresh()} to see the changes on the UI. <br>
      * Enables debug lines that display corners and padding of each child component. <br>
@@ -123,17 +123,17 @@ public class BLayout extends JPanel {
 
     /**
      * Adds this component horizontally and
-     * additionally returns its {@link Styles}. <p>
-     * Its {@link Styles} are pre-filled with
-     * {@link #defaultCompStyles} of this container.
+     * additionally returns its {@link CompWrapper}. <p>
+     * Its {@link CompWrapper} are pre-filled with
+     * {@link #defaultCompCompWrapper} of this container.
      */
-    public Styles addH(Component comp) {
+    public CompWrapper addH(Component comp) {
         super.add(comp);
-        Styles styles = new Styles(comp);
-        styles.map.putAll(defaultCompStyles.map); // Add defaults
-        styles.horizontal();
-        compsAndStyles.put(comp, styles);
-        return styles;
+        CompWrapper compWrapper = new CompWrapper(comp);
+        compWrapper.map.putAll(defaultCompCompWrapper.map); // Add defaults
+        compWrapper.horizontal();
+        compsAndStyles.put(comp, compWrapper);
+        return compWrapper;
     }
 
     /**
@@ -148,17 +148,17 @@ public class BLayout extends JPanel {
 
     /**
      * Adds this component vertically and
-     * additionally returns its {@link Styles}.<p>
-     * Its {@link Styles} are pre-filled with
-     * {@link #defaultCompStyles} of this container.
+     * additionally returns its {@link CompWrapper}.<p>
+     * Its {@link CompWrapper} are pre-filled with
+     * {@link #defaultCompCompWrapper} of this container.
      */
-    public Styles addV(Component comp) {
+    public CompWrapper addV(Component comp) {
         super.add(comp);
-        Styles styles = new Styles(comp);
-        styles.map.putAll(defaultCompStyles.map); // Add defaults
-        styles.vertical();
-        compsAndStyles.put(comp, styles);
-        return styles;
+        CompWrapper compWrapper = new CompWrapper(comp);
+        compWrapper.map.putAll(defaultCompCompWrapper.map); // Add defaults
+        compWrapper.vertical();
+        compsAndStyles.put(comp, compWrapper);
+        return compWrapper;
     }
 
     /**
@@ -186,7 +186,7 @@ public class BLayout extends JPanel {
     /**
      * Returns the styles for the provided child component.
      */
-    public Styles getChildStyles(Component comp) {
+    public CompWrapper getChildStyles(Component comp) {
         return compsAndStyles.get(comp);
     }
 
